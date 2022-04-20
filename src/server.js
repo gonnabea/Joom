@@ -1,6 +1,7 @@
 import express from "express";
 import http from 'http';
 import WebSocket from "ws";
+import SocketIO from "socket.io";
 
 const app = express();
 
@@ -12,35 +13,40 @@ app.get("/", (req, res) => res.render("home"));
 app.get("/*", (req, res) => res.redirect("/"));
 const handleListen = () => console.log("Listening on http://localhost:3000");
 
-const server = http.createServer(app);
+const httpServer = http.createServer(app);
+const wsServer = SocketIO(httpServer);
 
-const wss = new WebSocket.Server({ server });
+wsServer.on("connection", socket => {
+    console.log(socket);
+})
 
-const sockets = [];
+// const wss = new WebSocket.Server({ server });
 
-wss.on("connection", (socket) => {
-    sockets.push(socket);
-    socket["nickname"] = "Customer";
-    console.log("Connected to Browser");
-    socket.on("close", () => console.log("Disconnected from Browser!"))
-    socket.on("message", msg => {
-        const message = JSON.parse(msg);
-        switch(message.type) {
-            case "message":
-                sockets.forEach((aSocket) => aSocket.send(`${socket.nickname}: ${message.payload}`));
-                break;
-            case "nickname":
-                console.log(message)
-                socket["nickname"] = message.payload;
-                break;
+// const sockets = [];
+
+// wss.on("connection", (socket) => {
+//     sockets.push(socket);
+//     socket["nickname"] = "Customer";
+//     console.log("Connected to Browser");
+//     socket.on("close", () => console.log("Disconnected from Browser!"))
+//     socket.on("message", msg => {
+//         const message = JSON.parse(msg);
+//         switch(message.type) {
+//             case "message":
+//                 sockets.forEach((aSocket) => aSocket.send(`${socket.nickname}: ${message.payload}`));
+//                 break;
+//             case "nickname":
+//                 console.log(message)
+//                 socket["nickname"] = message.payload;
+//                 break;
             
-        }
+//         }
         
             
         
         
-    })
+//     })
     
-});
+// });
 
-server.listen(3000, handleListen);
+httpServer.listen(3000, handleListen);
