@@ -25,6 +25,9 @@ async function getMedia() {
 getMedia();
 
 function handleMuteClick() {
+    myStream
+        .getAudioTracks()
+        .forEach((track) => (track.enabled = !track.enabled));
     if(!muted) {
         muteBtn.innerText = "Unmute";
         muted = true
